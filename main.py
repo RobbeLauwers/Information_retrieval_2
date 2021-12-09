@@ -44,30 +44,33 @@ model.fit(train_dataloader=train_dataloader, epochs=1, warmup_steps=100,save_bes
 
 # TODO: actually use the correct data here
 # Make predictions (scores is a list of integers
-scores = model.predict([[row[2], row[2]] for row in dev_data_dict])
-scores_query = [[dev_data_dict[i][0], math.floor(scores[i] + 0.5)] for i in range(len(dev_data_dict))]
+scores = model.predict([[row[2], row[3]] for row in dev_data_dict])
+print(sorted([[dev_data_dict[i][0], dev_data_dict[i][1], math.floor(scores[i] + 0.5)] for i in range(len(dev_data_dict))], key=lambda x: (x[0], -x[2], x[1])))
+scores_query = [[dev_data_dict[i][0], dev_data_dict[i][1], math.floor(scores[i] + 0.5)] for i in range(len(dev_data_dict))]
 
 # TODO: use same output format as dev_data.csv, label should probably be 1 or 0 instead of score
 
 # TODO: actually sort results per query based on scores
 
-scores_sorted = sorted(scores_query, key=lambda x: (x[0], -x[1]))
+scores_sorted = sorted(scores_query, key=lambda x: (x[0], -x[2], x[1]))
 
-expected_scores = [[row[0], int(row[4])] for row in dev_data_dict]
+expected_scores = [[row[0], row[1], int(row[4])] for row in dev_data_dict]
+expected_scores = sorted(expected_scores, key=lambda x: (x[0], -x[2], x[1]))
 
 # Based on code from https://towardsdatascience.com/rbo-v-s-kendall-tau-to-compare-ranked-lists-of-items-8776c5182899
 def rbo(in1, in2, p=0.9):
     # tail recursive helper function
     list1 = [row[1] for row in in1]
     list2 = [row[1] for row in in2]
-    def helper(ret, i, start, d):
-        l1 = set(list1[start:start+i]) if start + i < len(list1) else set(list1[start:])
-        l2 = set(list2[start:start+i]) if start + i < len(list2) else set(list2[start:])
-        a_d = len(l1.intersection(l2))/i
-        term = math.pow(p, i) * a_d
-        if d == i:
-            return ret + term
-        return helper(ret + term, i + 1, start, d)
+    def helper(ret, j, start, d):
+        result = ret
+        for i in range(j, d + 1):
+            l1 = set(list1[start:start+i]) if start + i < len(list1) else set(list1[start:])
+            l2 = set(list2[start:start+i]) if start + i < len(list2) else set(list2[start:])
+            a_d = len(l1.intersection(l2))/i
+            term = math.pow(p, i) * a_d
+            result = ret + term
+        return result
     result_list = []
     start = 0
     k = 0
@@ -82,4 +85,6 @@ def rbo(in1, in2, p=0.9):
         k += 1
     return sum(result_list) / len(result_list)
 
+print(expected_scores)
+print(scores_sorted)
 print(rbo(expected_scores, scores_sorted))
