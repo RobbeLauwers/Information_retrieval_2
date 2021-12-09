@@ -1,4 +1,5 @@
-from sentence_transformers import SentenceTransformer, InputExample, losses, CrossEncoder
+import sentence_transformers.cross_encoder.evaluation
+from sentence_transformers import SentenceTransformer, InputExample, losses, CrossEncoder, cross_encoder, evaluation
 from torch.utils.data import DataLoader
 import csv
 import math
@@ -8,6 +9,9 @@ temp = 1
 
 #Read data, list contains more lists: [query,document_text,relevant]
 dev_data_dict = []
+
+dev_data_0 = {}
+dev_data_1 = {}
 
 # https://docs.python.org/3/library/csv.html
 csv.field_size_limit(991072)
@@ -27,15 +31,25 @@ with open('./data/dev_data.csv', newline='', encoding="utf8") as csvfile:
 #Define your train examples. (Trains on first temp rows of dataset)
 train_examples = []
 for row in dev_data_dict:
+    # Make dictionaries containing {key: queryNumber, value: [documentNumber]} but separate dicts for labels 0 and 1
+    # Used later for recall/precision
+    if int(row[0]) not in dev_data_1:
+        dev_data_1[int(row[0])] = []
+    if int(row[0]) not in dev_data_0:
+        dev_data_0[int(row[0])] = []
+    if int(row[4]) == 1:
+        dev_data_1[int(row[0])].append(int(row[1]))
+    else:
+        dev_data_0[int(row[0])].append(int(row[1]))
     #TODO: in the data where results are rated relevant or not, their order is also from most to least relevant.
     # We should take this into account by giving a small penalty to label based on position
-  train_examples.append( InputExample( texts=[row[2],row[3]],label=float(row[4]) ) )
+    train_examples.append( InputExample( texts=[str(row[2]),str(row[3])],label=float(row[4]) ) )
 
 #Define your train dataset, the dataloader and the train loss
 train_dataloader = DataLoader(train_examples, shuffle=True, batch_size=16)
-
 # Crossencoders are used to predict how well a query matches the result, which is what we need
-model = CrossEncoder('cross-encoder/ms-marco-TinyBERT-L-2')
+model = CrossEncoder('cross-encoder/ms-marco-TinyBERT-L-2', max_length=512)
+
 
 # Does this need more training?
 model.fit(train_dataloader=train_dataloader, epochs=1, warmup_steps=100,save_best_model=True,output_path="./output/modelTest")
@@ -45,6 +59,9 @@ model.fit(train_dataloader=train_dataloader, epochs=1, warmup_steps=100,save_bes
 # TODO: actually use the correct data here
 # Make predictions (scores is a list of integers
 scores = model.predict([[row[2], row[3]] for row in dev_data_dict])
+
+output_binary_label_unsorted = [[dev_data_dict[i][0], dev_data_dict[i][1], math.floor(scores[i] + 0.5)] for i in range(len(dev_data_dict))]
+
 print(sorted([[dev_data_dict[i][0], dev_data_dict[i][1], math.floor(scores[i] + 0.5)] for i in range(len(dev_data_dict))], key=lambda x: (x[0], -x[2], x[1])))
 scores_query = [[dev_data_dict[i][0], dev_data_dict[i][1], math.floor(scores[i] + 0.5)] for i in range(len(dev_data_dict))]
 
@@ -85,6 +102,36 @@ def rbo(in1, in2, p=0.9):
         k += 1
     return sum(result_list) / len(result_list)
 
+def precision_recall(dict_0,dict_1,results):
+    TP = 0
+    TN = 0
+    FP = 0
+    FN = 0
+    # precision = (aantal resultaten met label 1 die in testdata ook label 1 hebben)/(aantal resultaten met label 1)
+    # recall = (aantal resultaten met label 1 die in testdata ook label 1 hebben)/(aantal in testdata met label 1)
+    for row in results:
+        # positive
+        # If label is 1 (positive)
+        if int(row[2]) == 1:
+            # If document in this positive result is indeed in positive results for this query
+            if int(row[1]) in dict_1[int(row[0])]:
+                TP += 1
+            else:
+                FP += 1
+        # negative
+        else:
+            # If document in this negative result is indeed in negative results
+            if int(row[1]) in dict_0[int(row[0])]:
+                TN += 1
+            else:
+                FN += 1
+    # precision , recall
+    # https://developers.google.com/machine-learning/crash-course/classification/precision-and-recall
+    print("TP: " + str(TP) + ", TN: " + str(TN) + ", FP: " + str(FP) + ", FN: " + str(FN) )
+    return [( (TP)/(TP+FP) ),( (TP)/(TP+FN) )]
+
+
 print(expected_scores)
 print(scores_sorted)
 print(rbo(expected_scores, scores_sorted))
+print("precision, recall: " + str(precision_recall(dev_data_0,dev_data_1,output_binary_label_unsorted)))
