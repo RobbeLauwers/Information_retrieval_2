@@ -1,6 +1,7 @@
 from sentence_transformers import SentenceTransformer, InputExample, losses, CrossEncoder
 from torch.utils.data import DataLoader
 import csv
+import math
 
 # TODO: verwijderen als we volledige dataset inlezen
 temp = 1
@@ -43,11 +44,42 @@ model.fit(train_dataloader=train_dataloader, epochs=1, warmup_steps=100,save_bes
 
 # TODO: actually use the correct data here
 # Make predictions (scores is a list of integers
-scores = model.predict([["This is correct", "This is correct"],
-                        ["This is not", "Gibberish"]])
+scores = model.predict([[row[2], row[2]] for row in dev_data_dict])
+scores_query = [[dev_data_dict[i][0], math.floor(scores[i] + 0.5)] for i in range(len(dev_data_dict))]
 
 # TODO: use same output format as dev_data.csv, label should probably be 1 or 0 instead of score
 
 # TODO: actually sort results per query based on scores
 
-# TODO: rank biased overlap
+scores_sorted = sorted(scores_query, key=lambda x: (x[0], -x[1]))
+
+expected_scores = [[row[0], int(row[4])] for row in dev_data_dict]
+
+# Based on code from https://towardsdatascience.com/rbo-v-s-kendall-tau-to-compare-ranked-lists-of-items-8776c5182899
+def rbo(in1, in2, p=0.9):
+    # tail recursive helper function
+    list1 = [row[1] for row in in1]
+    list2 = [row[1] for row in in2]
+    def helper(ret, i, start, d):
+        l1 = set(list1[start:start+i]) if start + i < len(list1) else set(list1[start:])
+        l2 = set(list2[start:start+i]) if start + i < len(list2) else set(list2[start:])
+        a_d = len(l1.intersection(l2))/i
+        term = math.pow(p, i) * a_d
+        if d == i:
+            return ret + term
+        return helper(ret + term, i + 1, start, d)
+    result_list = []
+    start = 0
+    k = 0
+    current_query = in1[0][0]
+    for i in range(len(list1)):
+        if current_query != in1[i][0] or i == len(list1) - 1:
+            x_k = len(set(list1[start:start+k]).intersection(set(list2[start:start+k])))
+            summation = helper(0, 1, start, k)
+            result_list.append(((float(x_k)/k) * math.pow(p, k)) + ((1-p)/p * summation))
+            start = k
+            current_query = in1[i][0]
+        k += 1
+    return sum(result_list) / len(result_list)
+
+print(rbo(expected_scores, scores_sorted))
