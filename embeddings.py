@@ -93,7 +93,7 @@ for row in train_examples:
     print("\nTop 5 most similar sentences in corpus:")
 
     for score, idx in zip(top_results[0], top_results[1]):
-        print(corpus[idx], "(Score: " + str(float(score)) + ")")
+        print(corpus_temp[idx.item()], "(Score: " + str(float(score)) + ")")
         scores.append(float(score))
 
 
