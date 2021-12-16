@@ -22,5 +22,7 @@ are still floating point numbers.
 To convert the output to the correct format, run sort_output.py in this repository. This will generate the 
 neural_model_rank asked for in the assignment.
 
-A copy of the Colab notebook is available in this repository as notebook.ipynb. However, we did not test if giving it 
-access to Google Drive actually works outside Colab. It is provided purely for completeness in this repository.
+A copy of the Colab notebook is available in this repository as notebook.ipynb. It is provided purely to make sure that
+all code is available in this repository, but still contains hardcoded paths assuming that Colab is used. Some of the 
+output also does not display correctly in the version on github, so you should use the version on Colab if possible.
+https://colab.research.google.com/drive/1c2DH0ytXTdclzNoDIaTNI2d_eU5XyDun?usp=sharing
