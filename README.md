@@ -1,5 +1,7 @@
 # Information retrieval 2: Document Ranking Using a Neural Retrieval Model
 
+Presentation and report are Presentation.pdf and Report.pdf respectively.
+
 Instead of running the model training on our own computers, we used Google Colab. The online notebook is available here: 
 https://colab.research.google.com/drive/1c2DH0ytXTdclzNoDIaTNI2d_eU5XyDun?usp=sharing
 
