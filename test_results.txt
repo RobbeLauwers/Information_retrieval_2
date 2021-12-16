@@ -1,0 +1,77 @@
+#cross-encoder/qnli-distilroberta-base, rows=5000, epoch = 3, length = 512, batch = 16
+24:30
+TP: 2139, TN: 1798, FP: 769, FN: 293
+precision, recall: [0.7355570839064649, 0.8795230263157895]
+
+#cross-encoder/ms-marco-TinyBERT-L-2-v2, rows=all, epoch = 3, length = 512, batch = 16
+12:32
+TP: 2866, TN: 8103, FP: 1880, FN: 7143
+precision, recall: [0.6038769490096924, 0.28634229193725647]
+
+#cross-encoder/ms-marco-TinyBERT-L-2-v2, rows=all, epoch = 1, length = 256, batch = 16
+03:18
+TP: 3763, TN: 7960, FP: 2023, FN: 6246
+precision, recall: [0.6503629450397511, 0.37596163452892395]
+
+#cross-encoder/ms-marco-TinyBERT-L-2-v2, temp=all, epoch = 1, length = 512
+03:58
+TP: 3604, TN: 8248, FP: 1735, FN: 6405
+precision, recall: [0.6750327776737217, 0.36007593166150464]
+
+#cross-encoder/qnli-distilroberta-base, untrained
+TP: 4129, TN: 6292, FP: 3691, FN: 5880
+precision, recall: [0.5280051150895141, 0.4125287241482666]
+
+#cross-encoder/qnli-distilroberta-base, rows=all, epoch = 1, length = 512, batch = 16
+33:46
+TP: 6730, TN: 7199, FP: 2784, FN: 3279
+precision, recall: [0.7073785999579567, 0.6723948446398241]
+
+#cross-encoder/qnli-distilroberta-base, rows=5000, epoch = 3, batch = 16, max_length=256
+12:57
+TP: 1685, TN: 2236, FP: 331, FN: 747
+precision, recall: [0.8358134920634921, 0.6928453947368421]
+
+#cross-encoder/qnli-distilroberta-base, rows=5000, epoch = 3, batch=16, max_length=256, eval = CEBinaryClassificationEvaluator
+16:57
+TP: 1894, TN: 2061, FP: 506, FN: 538
+precision, recall: [0.7891666666666667, 0.7787828947368421]
+
+#cross-encoder/qnli-distilroberta-base, rows=10000, epoch = 3, max_length=256, eval = CEBinaryAccuracyEvaluator
+33:54
+TP: 4028, TN: 4156, FP: 928, FN: 887
+precision, recall: [0.8127522195318806, 0.8195320447609359]
+
+#cross-encoder/qnli-distilroberta-base, rows=5000, epoch = 3, max_length=256, eval = CEBinaryAccuracyEvaluator
+15:49
+TP: 1384, TN: 2335, FP: 232, FN: 1048
+precision, recall: [0.8564356435643564, 0.569078947368421]
+
+#cross-encoder/qnli-distilroberta-base, rows=5000 training but precision/recall on all, epoch = 3, max_length=256, eval = CEBinaryClassificationEvaluator
+16:07
+TP: 3067, TN: 8819, FP: 1164, FN: 6942
+precision, recall: [0.7248877333963601, 0.30642421820361676]
+
+#cross-encoder/qnli-distilroberta-base, rows=5000, epoch = 3, max_length=256, eval = CEBinaryClassificationEvaluator
+17:12
+TP: 1885, TN: 2058, FP: 509, FN: 547
+precision, recall: [0.7873851294903926, 0.7750822368421053]
+
+#cross-encoder/qnli-distilroberta-base, rows=all, epoch = 3, max_length=256, eval = CEBinaryClassificationEvaluator
+1:03:38
+TP: 8124, TN: 8306, FP: 1677, FN: 1885
+precision, recall: [0.8288950107131925, 0.8116694974522929]
+
+#cross-encoder/qnli-distilroberta-base, rows=5000, epoch = 3, max_length=256, eval = CEBinaryClassificationEvaluator, optimizer = Rprop
+16:55
+TP: 1260, TN: 1858, FP: 709, FN: 1172
+precision, recall: [0.6399187404773997, 0.5180921052631579]
+
+#cross-encoder/qnli-distilroberta-base, temp=10000, epoch = 3, max_length=256, eval = CERerankingEvaluator
+36:59
+TP: 4122, TN: 4123, FP: 961, FN: 793
+precision, recall: [0.8109384221916192, 0.8386571719226856]
+
+#Runs model trained on full dataset on dev_data.csv
+TP: 1472, TN: 1803, FP: 764, FN: 960
+precision, recall: [0.6583184257602862, 0.6052631578947368]
